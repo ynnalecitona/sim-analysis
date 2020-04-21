@@ -15,15 +15,21 @@ def nedt(rate):
     u = random.random()
     return ((-1 / rate) * log(1 - u)
 
+def gen_packet():
+    return packet.Packet(nedt(service_rate))
+
 class Packet:
     def __init__(self, service_time):
         self.service_time = service_time
 
 class Event:
-    def __init__(self, time,type, num):
+    def __init__(self, time, type, packet, prev_event, next_event):
         self.time = time
         self.type = type
-        self.num num
+        # self.num num
+        self.packet = packet
+        self.prev = prev_event;
+        self.next = next_event;
 
     def __It__(self, other):
         return self.time < other.time
@@ -36,11 +42,11 @@ class GELNode:
         self.next = Event
         self.prev = None
         self.data = None
-        
+
 class GEL:
     def __init__(self, Event):
         self.head = None
-    
+
     def addEvent(self, prev, Event):
         new_node = GelNode(Event)
         if self.head is None:
@@ -50,12 +56,12 @@ class GEL:
             # Iterate through the link until new event is in between
             while new_node.data.time > check_node.data.time:
                 check_node = check_node.next
-        
+
             check_node.prev.next = new_node
             new_node.prev = check_node.prev
             new_node.next = check_node
             check_node.prev = new_node
-              
+
     def removeEvent(self):
         if self.head is None:
             return None
@@ -66,22 +72,19 @@ class GEL:
             event.next = None
             return event
 
-items = []
+    def schedule(self, time, type, packet):
+        Event = event.Event(time, type, packet, None, None)
+        # call add event
 
-init = Event(time + nedt(arrival_rate), 1,1)
+pqueue = queue.Queue(MAXBUFFER)
+items = GEL.GEL()
 
-heapq.heappush(items,init)
+items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
-num = 1
-
-for i in range(10):
-    event = heapq.heappop(items)
-    print(event)
-    time = event.time
-    if event.type == 1:
-        nextEvent = Event(time + nedt(service_rate), 2, event.num)
-        heapq.heapqpush(items,nextEvent)
-    else:
-        num += 1
-        arrival_event = Event(time + nedt(arrival_rate),1,num)
-        heapq.heapqpush(items, arrival_event)
+for i in range(100000):
+    curr_event = items.pop()
+    curr_time = curr_event.time
+    # arrival
+    if curr_event.type == 0:
+        items.schedule(curr_time + nedt(arrival_rate), 0, generate_packet())
+    
