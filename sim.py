@@ -90,7 +90,7 @@ busy_server_flag = -1
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
 for i in range(100000):
-    curr_event = items.pop()
+    curr_event = items.pop() # need to check if this built in function works
     curr_time = curr_event.time
     # arrival
     if curr_event.type == 0:
