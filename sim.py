@@ -31,7 +31,40 @@ class Event:
     def __str__(self):
         return f"time={self.time}, type ={self.type}, num={self.num}"
 
+class GELNode:
+    def __init__(self, Event):
+        self.next = Event
+        self.prev = None
+        self.data = None
+        
 class GEL:
+    def __init__(self, Event):
+        self.head = None
+    
+    def addEvent(self, prev, Event):
+        new_node = GelNode(Event)
+        if self.head is None:
+            self.head = new_node
+        else:
+            check_node = self.head
+            # Iterate through the link until new event is in between
+            while new_node.data.time > check_node.data.time:
+                check_node = check_node.next
+        
+            check_node.prev.next = new_node
+            new_node.prev = check_node.prev
+            new_node.next = check_node
+            check_node.prev = new_node
+              
+    def removeEvent(self):
+        if self.head is None:
+            return None
+        else:
+            event = self.head
+            event.next.prev = None
+            self.head = event.next
+            event.next = None
+            return event
 
 items = []
 
