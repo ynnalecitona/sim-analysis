@@ -74,11 +74,19 @@ class GEL:
 
     def schedule(self, time, type, packet):
         Event = event.Event(time, type, packet, None, None)
-        # call add event
+        # call add event - is this correct syntax?
+        addEvent(None, Event)
 
 pqueue = queue.Queue(MAXBUFFER)
 items = GEL.GEL()
 
+# Stats Info to Keep Track Of
+curr_time = 0
+active_packets = 0
+dropped_packets = 0
+packets = 0
+busy_server_flag = -1
+            
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
 for i in range(100000):
@@ -87,4 +95,14 @@ for i in range(100000):
     # arrival
     if curr_event.type == 0:
         items.schedule(curr_time + nedt(arrival_rate), 0, generate_packet())
-    
+        packets += 1
+
+        if active_packets == 0:
+            items.schedule(curr_time + curr_event.packet.service_time, 1, curr_event.packet)
+            active_packets += 1
+        # not complete yet - do other cases
+            
+    # departure
+    elif curr_event.type == 1:
+            active_packets -= 1
+   
