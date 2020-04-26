@@ -72,20 +72,23 @@ class GEL:
             event.next = None
             return event
 
+    # creates the new event with specific information
+    # insert the event into the GEL 
     def schedule(self, time, type, packet):
         Event = event.Event(time, type, packet, None, None)
         # call add event - is this correct syntax?
         addEvent(None, Event)
 
+# queue.Queue constructor for a FIFO queue with maxsize = MAXBUFFER
 pqueue = queue.Queue(MAXBUFFER)
 items = GEL.GEL()
 
 # Stats Info to Keep Track Of
 curr_time = 0
-active_packets = 0
+active_packets = 0 #synonymous to length in the prompt
 dropped_packets = 0
 packets = 0
-busy_server_flag = -1
+busy_server = -1
             
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
@@ -94,15 +97,35 @@ for i in range(100000):
     curr_time = curr_event.time
     # arrival
     if curr_event.type == 0:
+        # schedule arrival event
+        # find the current time + arrival rate
+        # create new packet
+        # call schedule fuction
         items.schedule(curr_time + nedt(arrival_rate), 0, generate_packet())
         packets += 1
 
+        # if server is free
         if active_packets == 0:
+            # schedule a departure event
             items.schedule(curr_time + curr_event.packet.service_time, 1, curr_event.packet)
             active_packets += 1
-        # not complete yet - do other cases
+
+            # if server is busy
+            if busy_server == -1:
+                busy_server = curr_time
+
+        # if queue is not full
+        else if (MAXBUFFER == 0) or (active_packets < MAXBUFFER + 1):
+            # put packet into the queue
+            pqueue.put(curr_event.packet)
+            # since new arrival event, increment # of active_packets
+            active_packets += 1
+
+        # if the queue is full, drop packet
+        else if active_packets >= MAXBUFFER:
+            # record packet drop
+            dropped_packets += 1
             
     # departure
     elif curr_event.type == 1:
-            active_packets -= 1
    
