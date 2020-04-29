@@ -1,6 +1,6 @@
 import math
 import random
-import Queue as queue
+import queue
 
 # user inputs these 3 values so we can do multiple simulations
 MAXBUFFER = int(input("Enter MAXBUFFER size: "))
@@ -92,13 +92,13 @@ class GEL: # Doubly linked list of events
 # queue.Queue constructor for a FIFO queue with maxsize = MAXBUFFER
 pqueue = queue.Queue(MAXBUFFER)
 items = GEL() # shouldn't it be items = GEL()
-# items = GEL.GEL()
 
 # Stats Info to Keep Track Of
 curr_time = 0
-active_packets = 0 #synonymous to length in the prompt
+active_packets = 0
 dropped_packets = 0
 packets = 0
+queue_length = 0
 busy_server = -1
             
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
@@ -114,7 +114,8 @@ for i in range(50): #for debugging
         # call schedule fuction
         items.schedule(curr_time + nedt(arrival_rate), 0, generate_packet())
         packets += 1
-
+        queue_length += active_packets
+        
         # if server is free
         if active_packets == 0:
             # schedule a departure event
@@ -147,10 +148,18 @@ for i in range(50): #for debugging
 
         if active_packets == 0:
             #DO NOTHING
+            # need to do calculation here for busy server time
             print("No active packets")
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
 
-
-   
+print("statistics results")
+print(busy_server)
+print(active_packets)
+print(dropped_packets)
+print(curr_time)
+print("packet drop rate:")
+print(dropped_packets / packets)
+print("averange queue length:")
+print(queue_length/packets)
