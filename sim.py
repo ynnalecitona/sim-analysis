@@ -34,16 +34,19 @@ class Event:
     def __It__(self, other):
         return self.time < other.time
 
+# Not sure what this is for, commented out b/c compilation error
 #    def __str__(self):
  #       return f"time={self.time}, type ={self.type}, num={self.num}"
 
 
-# Took out GELNode since event has the prev and next events
-class GEL:
+# Update: Took out GELNode since event has the prev and next events
+
+class GEL: # Doubly linked list of events
     def __init__(self):
         self.head = None
 
     def addEvent(self, event):
+        print("Event added") # Need to delete before submission
         if self.head is None:
             self.head = event
         else:
@@ -69,11 +72,11 @@ class GEL:
             check_node.prev = event
 
     def removeEvent(self):
-        if self.head is None: #For when the link is empty
+        if self.head is None: # For when the link is empty
             return None
         else:  
             event = self.head  # Return the first event in link
-            if event.next is not None:
+            if event.next is not None: # If only one event
                 event.next.prev = None
                 self.head = event.next
             event.next = None
@@ -100,7 +103,7 @@ busy_server = -1
             
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
-for i in range(100000):
+for i in range(50): #for debugging
     curr_event = items.removeEvent() # need to check if this built in function works
     curr_time = curr_event.time
     # arrival
@@ -132,6 +135,7 @@ for i in range(100000):
         # if the queue is full, drop packet
         elif active_packets >= MAXBUFFER:
             # record packet drop
+            print("Packet dropped")
             dropped_packets += 1
             
     # departure
