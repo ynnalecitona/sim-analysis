@@ -1,11 +1,11 @@
 import math
 import random
-import queue
+import Queue as queue
 
 # user inputs these 3 values so we can do multiple simulations
 MAXBUFFER = int(input("Enter MAXBUFFER size: "))
 service_rate = float(input("Enter service rate: "))
-arrival_rate = float(input("Enter service rate: "))
+arrival_rate = float(input("Enter arrival rate: "))
 
 time = 0
 
@@ -13,10 +13,10 @@ time = 0
 # From the prompt
 def nedt(rate):
     u = random.random()
-    return ((-1 / rate) * log(1 - u)
+    return ((-1 / rate) * math.log(1 - u))
 
-def gen_packet():
-    return packet.Packet(nedt(service_rate))
+def generate_packet():
+    return Packet(nedt(service_rate))
 
 class Packet:
     def __init__(self, service_time):
@@ -34,54 +34,62 @@ class Event:
     def __It__(self, other):
         return self.time < other.time
 
-    def __str__(self):
-        return f"time={self.time}, type ={self.type}, num={self.num}"
+#    def __str__(self):
+ #       return f"time={self.time}, type ={self.type}, num={self.num}"
 
-class GELNode:
-    def __init__(self, Event):
-        self.next = Event
-        self.prev = None
-        self.data = None
 
+# Took out GELNode since event has the prev and next events
 class GEL:
-    def __init__(self, Event):
+    def __init__(self):
         self.head = None
 
-    def addEvent(self, prev, Event):
-        new_node = GelNode(Event)
+    def addEvent(self, event):
         if self.head is None:
-            self.head = new_node
+            self.head = event
         else:
             check_node = self.head
             # Iterate through the link until new event is in between
-            while new_node.data.time > check_node.data.time:
-                check_node = check_node.next
+            if check_node.time > event.time: #if the new event time is shorter than the first one, make it be the first and rearrange the prev and next accordingly
+                check_node.prev = event
+                event.next = check_node
+                self.head = event
+            while event.time > check_node.time: #Iterate until new event is less than an existing event
+                if check_node.next is None: # new event has largest time
+                    check_node.next = event
+                    event.prev = check_node
+                    event.next = None
+                    return event
+                else:
+                    check_node = check_node.next
 
-            check_node.prev.next = new_node
-            new_node.prev = check_node.prev
-            new_node.next = check_node
-            check_node.prev = new_node
+            # new event somewhere in middle of link
+            check_node.prev.next = event
+            event.prev = check_node.prev
+            event.next = check_node
+            check_node.prev = event
 
     def removeEvent(self):
-        if self.head is None:
+        if self.head is None: #For when the link is empty
             return None
-        else:
-            event = self.head
-            event.next.prev = None
-            self.head = event.next
+        else:  
+            event = self.head  # Return the first event in link
+            if event.next is not None:
+                event.next.prev = None
+                self.head = event.next
             event.next = None
             return event
 
     # creates the new event with specific information
     # insert the event into the GEL 
     def schedule(self, time, type, packet):
-        Event = event.Event(time, type, packet, None, None)
+        event = Event(time, type, packet, None, None)
         # call add event - is this correct syntax?
-        addEvent(None, Event)
+        self.addEvent(event) #not sure why error says we're inputting 3 arguments 
 
 # queue.Queue constructor for a FIFO queue with maxsize = MAXBUFFER
 pqueue = queue.Queue(MAXBUFFER)
-items = GEL.GEL()
+items = GEL() # shouldn't it be items = GEL()
+# items = GEL.GEL()
 
 # Stats Info to Keep Track Of
 curr_time = 0
@@ -93,7 +101,7 @@ busy_server = -1
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
 for i in range(100000):
-    curr_event = items.pop() # need to check if this built in function works
+    curr_event = items.removeEvent() # need to check if this built in function works
     curr_time = curr_event.time
     # arrival
     if curr_event.type == 0:
@@ -115,17 +123,30 @@ for i in range(100000):
                 busy_server = curr_time
 
         # if queue is not full
-        else if (MAXBUFFER == 0) or (active_packets < MAXBUFFER + 1):
+        elif (MAXBUFFER == 0) or (active_packets < MAXBUFFER + 1):
             # put packet into the queue
             pqueue.put(curr_event.packet)
             # since new arrival event, increment # of active_packets
             active_packets += 1
 
         # if the queue is full, drop packet
-        else if active_packets >= MAXBUFFER:
+        elif active_packets >= MAXBUFFER:
             # record packet drop
             dropped_packets += 1
             
     # departure
-    elif curr_event.type == 1:
+    elif curr_event.type == 1: #departure
+        curr_time = curr_event.time
+        #TODO: ADD to update the statistic and server busy timei
+         
+        active_packets -= 1
+
+        if active_packets == 0:
+            #DO NOTHING
+            print("No active packets")
+        if active_packets > 0: #if there are more packets left in the queue, schedule for departure
+            first_packet = pqueue.get()
+            items.schedule(curr_time + first_packet.service_time, 1, first_packet)
+
+
    
