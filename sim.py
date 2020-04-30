@@ -3,7 +3,7 @@ import random
 import queue
 
 # user inputs these 3 values so we can do multiple simulations
-MAXBUFFER = int(input("Enter MAXBUFFER size: "))
+MAXBUFFER = float(input("Enter MAXBUFFER size: "))
 service_rate = float(input("Enter service rate: "))
 arrival_rate = float(input("Enter arrival rate: "))
 
@@ -44,7 +44,7 @@ class GEL: # Doubly linked list of events
         self.head = None
 
     def addEvent(self, event):
-        print("Event added") # Need to delete before submission
+        # print("Event added") # Need to delete before submission
         if self.head is None:
             self.head = event
         else:
@@ -136,7 +136,7 @@ for i in range(100000): #for debugging
         # if the queue is full, drop packet
         elif active_packets >= MAXBUFFER:
             # record packet drop
-            print("Packet dropped")
+            # print("Packet dropped")
             dropped_packets += 1
             
     # departure
@@ -144,13 +144,14 @@ for i in range(100000): #for debugging
         active_packets -= 1
 
         if active_packets == 0 and busy_server != -1:
-            print("No active packets")
-            total_server = curr_time - busy_server
+            # print("No active packets")
+            total_server += curr_time - busy_server
             busy_server = -1
+            
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
-            print("Packet departure")
+            # print("Packet departure")
 
 # Statistics Calculations
 mean_length = queue_length/packets
@@ -163,3 +164,5 @@ print("mean queue length:")
 print(mean_length)
 print("number of packets dropped:")
 print(dropped_packets)
+print("queue length:")
+print(queue_length)
