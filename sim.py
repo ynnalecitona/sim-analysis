@@ -2,15 +2,14 @@ import math
 import random
 import queue
 
-# user inputs these 3 values so we can do multiple simulations
-MAXBUFFER = float(input("Enter MAXBUFFER size: "))
-service_rate = float(input("Enter service rate: "))
-arrival_rate = float(input("Enter arrival rate: "))
+# 3.2 Initialization Pt. 2
+MAXBUFFER = float(input("MAXBUFFER size: "))
+service_rate = float(input("service rate: "))
+arrival_rate = float(input("arrival rate: "))
 
 time = 0
 
-# Generate Service and Arrival Time
-# From the prompt
+# 3.6 Generating Time Intervals in Negative Exponential Distribution
 def nedt(rate):
     u = random.random()
     return ((-1 / rate) * math.log(1 - u))
@@ -18,6 +17,7 @@ def nedt(rate):
 def generate_packet():
     return Packet(nedt(service_rate))
 
+# 3.2 Initialization Pt. 1 <- Tao's Discussion
 class Packet:
     def __init__(self, service_time):
         self.service_time = service_time
@@ -33,11 +33,6 @@ class Event:
 
     def __It__(self, other):
         return self.time < other.time
-
-# Not sure what this is for, commented out b/c compilation error
-#    def __str__(self):
- #       return f"time={self.time}, type ={self.type}, num={self.num}"
-
 
 class GEL: # Doubly linked list of events
     def __init__(self):
@@ -88,25 +83,35 @@ class GEL: # Doubly linked list of events
 
 # queue.Queue constructor for a FIFO queue with maxsize = MAXBUFFER
 pqueue = queue.Queue(MAXBUFFER)
+
+# Create global event list
 items = GEL()
 
-# Stats Info to Keep Track Of
+# Stats Values to Keep Track Of
 curr_time = 0
+
 active_packets = 0
 dropped_packets = 0
 packets = 0
+
 queue_length = 0
+
+# flag to check if the server is busy
 busy_server = -1
 total_server = 0        
 
-# Beginning of Simulation
-            
+# 0 = arrival
+# 1 = departure
+
+# 3.2 Initialization, Pt. 3           
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
-for i in range(100000): #for debugging
-    curr_event = items.removeEvent() # need to check if this built in function works
+# Simulation Begins
+for i in range(100000):
+    curr_event = items.removeEvent() 
     curr_time = curr_event.time
-    # arrival
+
+    # 3.3 Processing an Arrival Event
     if curr_event.type == 0:
         # schedule arrival event
         # find the current time + arrival rate
@@ -139,23 +144,27 @@ for i in range(100000): #for debugging
             # print("Packet dropped")
             dropped_packets += 1
             
-    # departure
-    elif curr_event.type == 1: #departure
+    # 3.4 Processing a Departure Event
+    elif curr_event.type == 1:
         active_packets -= 1
 
+        # if queue is empty and server !busy
         if active_packets == 0 and busy_server != -1:
+            # Do nothing
             # print("No active packets")
             total_server += curr_time - busy_server
             busy_server = -1
-            
+
+        # if queue is not empty
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
             # print("Packet departure")
 
-# Statistics Calculations
+# 3.5 Collecting Statistics
 mean_length = queue_length/packets
 utilization = total_server / curr_time
+
 # Statistics Output
 print("statistics results")
 print("utilization:")
