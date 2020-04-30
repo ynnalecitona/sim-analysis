@@ -158,7 +158,7 @@ mean_length = queue_length/packets
 utilization = total_server / curr_time
 # Statistics Output
 print("statistics results")
-print("utlization:")
+print("utilization:")
 print(utilization)
 print("mean queue length:")
 print(mean_length)
