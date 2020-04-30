@@ -1,6 +1,6 @@
 import math
 import random
-import Queue as queue
+import queue
 
 # user inputs these 3 values so we can do multiple simulations
 MAXBUFFER = int(input("Enter MAXBUFFER size: "))
@@ -84,22 +84,23 @@ class GEL: # Doubly linked list of events
     # insert the event into the GEL 
     def schedule(self, time, type, packet):
         event = Event(time, type, packet, None, None)
-        # call add event - is this correct syntax?
         self.addEvent(event) #not sure why error says we're inputting 3 arguments 
 
 # queue.Queue constructor for a FIFO queue with maxsize = MAXBUFFER
 pqueue = queue.Queue(MAXBUFFER)
-items = GEL() # shouldn't it be items = GEL()
-# items = GEL.GEL()
+items = GEL()
 
 # Stats Info to Keep Track Of
 curr_time = 0
-active_packets = 0 #synonymous to length in the prompt
+active_packets = 0
 dropped_packets = 0
 packets = 0
+queue_length = 0
 busy_server = -1
 total_server = 0        
 
+# Beginning of Simulation
+            
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
 for i in range(5): #for debugging
@@ -113,7 +114,8 @@ for i in range(5): #for debugging
         # call schedule fuction
         items.schedule(curr_time + nedt(arrival_rate), 0, generate_packet())
         packets += 1
-
+        queue_length += active_packets
+        
         # if server is free
         if active_packets == 0:
             # schedule a departure event
@@ -150,5 +152,13 @@ for i in range(5): #for debugging
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
             print("Packet departure")
 
+# Statistics Calculations
+mean_length = queue_length/packets
 
- 
+# Statistics Output
+print("statistics results")
+print("utlization:")
+print("mean queue length:")
+print(mean_length)
+print("number of packets dropped:")
+print(dropped_packets)
