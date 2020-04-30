@@ -103,7 +103,7 @@ total_server = 0
             
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
-for i in range(5): #for debugging
+for i in range(100000): #for debugging
     curr_event = items.removeEvent() # need to check if this built in function works
     curr_time = curr_event.time
     # arrival
@@ -145,7 +145,7 @@ for i in range(5): #for debugging
 
         if active_packets == 0:
             print("No active packets")
-            total_server = busy_server + curr_time
+            total_server = curr_time - busy_server
             busy_server = -1
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
@@ -154,10 +154,11 @@ for i in range(5): #for debugging
 
 # Statistics Calculations
 mean_length = queue_length/packets
-
+utilization = total_server / curr_time
 # Statistics Output
 print("statistics results")
 print("utlization:")
+print(utilization)
 print("mean queue length:")
 print(mean_length)
 print("number of packets dropped:")
