@@ -39,8 +39,6 @@ class Event:
  #       return f"time={self.time}, type ={self.type}, num={self.num}"
 
 
-# Update: Took out GELNode since event has the prev and next events
-
 class GEL: # Doubly linked list of events
     def __init__(self):
         self.head = None
@@ -100,10 +98,11 @@ active_packets = 0 #synonymous to length in the prompt
 dropped_packets = 0
 packets = 0
 busy_server = -1
-            
+total_server = 0        
+
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
-for i in range(50): #for debugging
+for i in range(5): #for debugging
     curr_event = items.removeEvent() # need to check if this built in function works
     curr_time = curr_event.time
     # arrival
@@ -140,17 +139,16 @@ for i in range(50): #for debugging
             
     # departure
     elif curr_event.type == 1: #departure
-        curr_time = curr_event.time
-        #TODO: ADD to update the statistic and server busy timei
-         
         active_packets -= 1
 
         if active_packets == 0:
-            #DO NOTHING
             print("No active packets")
+            total_server = busy_server + curr_time
+            busy_server = -1
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
+            print("Packet departure")
 
 
-   
+ 
