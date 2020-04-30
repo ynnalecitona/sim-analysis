@@ -143,7 +143,7 @@ for i in range(100000): #for debugging
     elif curr_event.type == 1: #departure
         active_packets -= 1
 
-        if active_packets == 0:
+        if active_packets == 0 and busy_server != -1:
             print("No active packets")
             total_server = curr_time - busy_server
             busy_server = -1
