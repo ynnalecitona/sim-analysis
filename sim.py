@@ -86,12 +86,11 @@ class GEL: # Doubly linked list of events
     # insert the event into the GEL 
     def schedule(self, time, type, packet):
         event = Event(time, type, packet, None, None)
-        # call add event - is this correct syntax?
         self.addEvent(event) #not sure why error says we're inputting 3 arguments 
 
 # queue.Queue constructor for a FIFO queue with maxsize = MAXBUFFER
 pqueue = queue.Queue(MAXBUFFER)
-items = GEL() # shouldn't it be items = GEL()
+items = GEL()
 
 # Stats Info to Keep Track Of
 curr_time = 0
@@ -100,6 +99,8 @@ dropped_packets = 0
 packets = 0
 queue_length = 0
 busy_server = -1
+
+# Beginning of Simulation
             
 items.schedule(time + nedt(arrival_rate), 0, generate_packet())
 
@@ -148,18 +149,18 @@ for i in range(50): #for debugging
 
         if active_packets == 0:
             #DO NOTHING
-            # need to do calculation here for busy server time
             print("No active packets")
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
 
+# Statistics Calculations
+mean_length = queue_length/packets
+
+# Statistics Output
 print("statistics results")
-print(busy_server)
-print(active_packets)
+print("utlization:")
+print("mean queue length:")
+print(mean_length)
+print("number of packets dropped:")
 print(dropped_packets)
-print(curr_time)
-print("packet drop rate:")
-print(dropped_packets / packets)
-print("averange queue length:")
-print(queue_length/packets)
