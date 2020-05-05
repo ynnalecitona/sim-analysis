@@ -97,7 +97,7 @@ packets = 0
 queue_length = 0
 
 # flag to check if the server is busy
-busy_server = -1
+busy_server = 0
 total_server = 0        
 
 # 0 = arrival
@@ -113,22 +113,22 @@ for i in range(100000):
 
     # 3.3 Processing an Arrival Event
     if curr_event.type == 0:
+        queue_length += active_packets
+        packets += 1
         # schedule arrival event
         # find the current time + arrival rate
         # create new packet
         # call schedule fuction
         items.schedule(curr_time + nedt(arrival_rate), 0, generate_packet())
-        packets += 1
-        queue_length += active_packets
         
         # if server is free
         if active_packets == 0:
             # schedule a departure event
             items.schedule(curr_time + curr_event.packet.service_time, 1, curr_event.packet)
             active_packets += 1
-
+            
             # if server is busy
-            if busy_server == -1:
+            if busy_server == 0:
                 busy_server = curr_time
 
         # if queue is not full
@@ -139,7 +139,7 @@ for i in range(100000):
             active_packets += 1
 
         # if the queue is full, drop packet
-        elif active_packets >= MAXBUFFER:
+        else:
             # record packet drop
             # print("Packet dropped")
             dropped_packets += 1
@@ -147,31 +147,26 @@ for i in range(100000):
     # 3.4 Processing a Departure Event
     elif curr_event.type == 1:
         active_packets -= 1
+        packets += 1
+        
+        # busy_server = 0
 
-        # if queue is empty and server !busy
-        if active_packets == 0 and busy_server != -1:
-            # Do nothing
-            # print("No active packets")
-            total_server += curr_time - busy_server
-            busy_server = -1
+        if active_packets == 0 and busy_server != 0:
+          #total_server += nedt(service_rate)
+          total_server += curr_time - busy_server
+          busy_server = 0
 
         # if queue is not empty
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
-            # print("Packet departure")
-
+            # total_server += nedt(service_rate)
+            # busy_server = 1
+            
 # 3.5 Collecting Statistics
-mean_length = queue_length/packets
-utilization = total_server / curr_time
 
-# Statistics Output
 print("statistics results")
-print("utilization:")
-print(utilization)
-print("mean queue length:")
-print(mean_length)
-print("number of packets dropped:")
-print(dropped_packets)
-print("queue length:")
-print(queue_length)
+print("utilization:", total_server / curr_time)
+print("mean queue length:", queue_length/packets)
+print("queue_length:", queue_length)
+print("number of packets dropped:", dropped_packets)
