@@ -71,7 +71,7 @@ class GEL: # Doubly linked list of events
             event = self.head  # Return the first event in link
             if event.next is not None: # If only one event
                 event.next.prev = None
-                self.head = event.next
+            self.head = event.next
             event.next = None
             return event
 
@@ -104,13 +104,13 @@ total_server = 0
 # 1 = departure
 
 # 3.2 Initialization, Pt. 3           
-items.schedule(time + nedt(arrival_rate), 0, generate_packet())
+items.schedule(nedt(arrival_rate), 0, generate_packet())
 
 # Simulation Begins
 for i in range(100000):
     curr_event = items.removeEvent() 
     curr_time = curr_event.time
-
+    
     # 3.3 Processing an Arrival Event
     if curr_event.type == 0:
         queue_length += active_packets
@@ -126,7 +126,6 @@ for i in range(100000):
             # schedule a departure event
             items.schedule(curr_time + curr_event.packet.service_time, 1, curr_event.packet)
             active_packets += 1
-            
             # if server is busy
             if busy_server == 0:
                 busy_server = curr_time
@@ -137,9 +136,8 @@ for i in range(100000):
             pqueue.put(curr_event.packet)
             # since new arrival event, increment # of active_packets
             active_packets += 1
-
         # if the queue is full, drop packet
-        else:
+        elif (active_packets > MAXBUFFER):
             # record packet drop
             # print("Packet dropped")
             dropped_packets += 1
@@ -147,12 +145,7 @@ for i in range(100000):
     # 3.4 Processing a Departure Event
     elif curr_event.type == 1:
         active_packets -= 1
-        packets += 1
-        
-        # busy_server = 0
-
         if active_packets == 0 and busy_server != 0:
-          #total_server += nedt(service_rate)
           total_server += curr_time - busy_server
           busy_server = 0
 
@@ -160,13 +153,14 @@ for i in range(100000):
         if active_packets > 0: #if there are more packets left in the queue, schedule for departure
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
-            # total_server += nedt(service_rate)
-            # busy_server = 1
-            
+
+if busy_server != 0:
+    total_server += curr_time - busy_server
+
 # 3.5 Collecting Statistics
 
 print("statistics results")
 print("utilization:", total_server / curr_time)
-print("mean queue length:", queue_length/packets)
+print("mean queue length:", queue_length / packets)
 print("queue_length:", queue_length)
 print("number of packets dropped:", dropped_packets)
