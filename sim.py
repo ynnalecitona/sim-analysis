@@ -137,7 +137,7 @@ for i in range(100000):
             # since new arrival event, increment # of active_packets
             active_packets += 1
         # if the queue is full, drop packet
-        elif (active_packets > MAXBUFFER):
+        else: # (active_packets > MAXBUFFER):
             # record packet drop
             # print("Packet dropped")
             dropped_packets += 1
