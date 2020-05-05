@@ -7,8 +7,6 @@ MAXBUFFER = float(input("MAXBUFFER size: "))
 service_rate = float(input("service rate: "))
 arrival_rate = float(input("arrival rate: "))
 
-time = 0
-
 # 3.6 Generating Time Intervals in Negative Exponential Distribution
 def nedt(rate):
     u = random.random()
@@ -100,8 +98,8 @@ queue_length = 0
 busy_server = 0
 total_server = 0        
 
-# 0 = arrival
-# 1 = departure
+# arrival = 0
+# departure = 1
 
 # 3.2 Initialization, Pt. 3           
 items.schedule(nedt(arrival_rate), 0, generate_packet())
@@ -113,13 +111,13 @@ for i in range(100000):
     
     # 3.3 Processing an Arrival Event
     if curr_event.type == 0:
-        queue_length += active_packets
-        packets += 1
         # schedule arrival event
         # find the current time + arrival rate
         # create new packet
         # call schedule fuction
         items.schedule(curr_time + nedt(arrival_rate), 0, generate_packet())
+        packets += 1
+        queue_length += active_packets
         
         # if server is free
         if active_packets == 0:
@@ -145,6 +143,7 @@ for i in range(100000):
     # 3.4 Processing a Departure Event
     elif curr_event.type == 1:
         active_packets -= 1
+        
         if active_packets == 0 and busy_server != 0:
           total_server += curr_time - busy_server
           busy_server = 0
