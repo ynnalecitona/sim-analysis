@@ -153,9 +153,6 @@ for i in range(100000):
             first_packet = pqueue.get()
             items.schedule(curr_time + first_packet.service_time, 1, first_packet)
 
-if busy_server != 0:
-    total_server += curr_time - busy_server
-
 # 3.5 Collecting Statistics
 
 print("statistics results")
